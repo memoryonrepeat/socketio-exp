@@ -41,6 +41,14 @@
       socket.on('chat message', function(msg){
         $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
       });
+      socket.on('new connection', function(id){
+        $('#messages').append(id + ' has connected <br>');
+      });
+      socket.on('new disconnection', function(id){
+        $('#messages').append(id + ' has disconnected <br>');
+      });
     </script>
   </body>
 </html>
+
+
