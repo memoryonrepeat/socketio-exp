@@ -6,7 +6,6 @@ Don’t send the same message to the user that sent it himself. Instead, append 
 Add “{user} is typing” functionality
 Show who’s online
 Add private messaging
-Share your improvements!
 */
 
 var app = require('express')();
