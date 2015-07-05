@@ -17,13 +17,25 @@ app.get('/', function(req, res){
 });
 
 io.on('connection', function(socket){
+
   io.emit('new connection', socket.id);
+
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
   });
+
   socket.on('disconnect', function(){
-  	io.emit('new disconnection', socket.id);
+  	io.emit('new disconnection', socket.username || socket.id);
   });
+
+  socket.on('username changed', function(username){
+  	socket.username = username;
+  	io.emit('username changed', {
+  		from: socket.id,
+  		to: socket.username
+  	});
+  });
+
 });
 
 http.listen(3000, function(){

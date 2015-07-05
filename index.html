@@ -20,8 +20,13 @@
       <div id="chat-window" class="box">
         <div id="messages">
         </div>
-        <form action="">
-          <input id="m" autocomplete="off" /><button>Send</button>
+        <form id="message_form" action="">
+          <input id="message" autocomplete="off" />
+          <button type="submit">Send</button>
+        </form>
+        <form id="username_form" action="">
+          <input id="username" autocomplete="off" />
+          <button type="submit">Username</button>
         </form>
       </div>
     </div>
@@ -29,24 +34,40 @@
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io();
+
       console.log(socket);
-      $('form').submit(function(){
+
+      $('#message_form').submit(function(){
         socket.emit('chat message', {
-          sender: socket.id,
-          content: $('#m').val()
+          sender:  socket.username || socket.id,
+          content: $('#message').val()
         });
-        $('#m').val('');
+        $('#message').val('');
         return false;
       });
-      socket.on('chat message', function(msg){
-        $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
+
+      $('#username_form').submit(function(){
+        socket.username = $('#username').val();
+        socket.emit('username changed', socket.username);
+        return false;
       });
+
       socket.on('new connection', function(id){
         $('#messages').append(id + ' has connected <br>');
       });
+
       socket.on('new disconnection', function(id){
         $('#messages').append(id + ' has disconnected <br>');
       });
+
+      socket.on('username changed', function(info){
+        $('#messages').append(info.from + ' has changed to ' + info.to + ' <br>');
+      });
+
+      socket.on('chat message', function(msg){
+        $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
+      });
+
     </script>
   </body>
 </html>
