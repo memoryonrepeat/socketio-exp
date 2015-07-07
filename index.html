@@ -41,6 +41,8 @@
         socket.emit('chat message', {
           sender:  socket.username || socket.id,
           content: $('#message').val()
+        }, function(){
+          
         });
         $('#message').val('');
         return false;

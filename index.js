@@ -6,6 +6,7 @@ TODO:
 Add “{user} is typing” functionality
 Show who’s online
 Add private messaging
+Make a proper API doc
 */
 
 var app = require('express')();
@@ -21,7 +22,12 @@ io.on('connection', function(socket){
   io.emit('new connection', socket.id);
 
   socket.on('chat message', function(msg){
+
+    // socket.broadcast echoes the event to all sockets except the sender
     socket.broadcast.emit('chat message', msg);
+    
+    // socket.emit echoes the event to the same socket only
+    // socket.emit('chat message', msg);
   });
 
   socket.on('disconnect', function(){
@@ -30,6 +36,8 @@ io.on('connection', function(socket){
 
   socket.on('username changed', function(username){
   	socket.username = username;
+
+    // io.emit echoes the event to all connected sockets
   	io.emit('username changed', {
   		from: socket.id,
   		to: socket.username
