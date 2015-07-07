@@ -1,12 +1,16 @@
 /*
 TODO:
-(DONE) Broadcast a message to connected users when someone connects or disconnects
-(DONE) Add support for nicknames
-(DONE) Don’t send the same message to the user that sent it himself. Instead, append the message directly as soon as he presses enter.
-Add “{user} is typing” functionality
-Show who’s online
-Add private messaging
-Make a proper API doc
+- Add “{user} is typing” functionality
+- Show who’s online
+- Add private messaging
+- Add room functionality
+- Username should be unique
+- Make a proper app & API doc
+- Reliable channel: Acknowledge that message received
+- "seen" feature
+---------------------------------------
+Rules:
+- Backend does not handle UI logic. Just pass object to frontend
 */
 
 var app = require('express')();
@@ -19,35 +23,63 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
 
-  io.emit('new connection', socket.id);
+  // io.emit echoes the event to all connected sockets
+  io.emit('newConnection', socket.id);
 
-  socket.on('chat message', function(msg){
+  socket.on('chatMessage', function(msg){
 
-    // socket.broadcast echoes the event to all sockets except the sender
-    socket.broadcast.emit('chat message', msg);
+    // socket.broadcast relays the event to all sockets except the sender
+    socket.broadcast.emit('chatMessage', {
+      sender: msg.sender,
+      content: msg.content,
+      self: false
+    });
     
     // socket.emit echoes the event to the same socket only
-    // socket.emit('chat message', msg);
+    socket.emit('chatMessage', {
+      content: msg.content,
+      self: true
+    });
+
   });
 
   socket.on('disconnect', function(){
-  	io.emit('new disconnection', socket.username || socket.id);
+  	io.emit('newDisconnection', socket.username || socket.id);
   });
 
-  socket.on('username changed', function(username){
-  	socket.username = username;
+  socket.on('usernameChanged', function(username){
 
-    // io.emit echoes the event to all connected sockets
-  	io.emit('username changed', {
-  		from: socket.id,
-  		to: socket.username
+    // Notify self
+    socket.emit('usernameChanged',{
+      self: true,
+      from: socket.username || socket.id,
+      to: username
+    })
+
+    // Notify the rest
+  	socket.broadcast.emit('usernameChanged', {
+      self: false,
+  		from: socket.username || socket.id,
+  		to: username
   	});
+
+    // Change username finally
+    socket.username = username;
+
   });
 
-  socket.on('login', function(username){ 
+  socket.on('login', function(username){
     socket.username = username;
-    socket.emit('serverMessage', 'Currently logged in as ' + username); 
-    socket.broadcast.emit('serverMessage', 'User ' + username + ' logged in');  
+
+    socket.emit('loggedIn',{
+      self: true,
+      username: username
+    }); 
+
+    socket.broadcast.emit('loggedIn',{
+      self: false,
+      username: username
+    });  
   });
 
   socket.emit('login');

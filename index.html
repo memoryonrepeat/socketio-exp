@@ -38,7 +38,7 @@
       console.log(socket);
 
       $('#message_form').submit(function(){
-        socket.emit('chat message', {
+        socket.emit('chatMessage', {
           sender:  socket.username || socket.id,
           content: $('#message').val()
         }, function(){
@@ -50,34 +50,49 @@
 
       $('#username_form').submit(function(){
         socket.username = $('#username').val();
-        socket.emit('username changed', socket.username);
+        socket.emit('usernameChanged', socket.username);
         return false;
       });
 
-      socket.on('new connection', function(id){
+      socket.on('newConnection', function(id){
         $('#messages').append(id + ' has connected <br>');
       });
 
-      socket.on('new disconnection', function(id){
+      socket.on('newDisconnection', function(id){
         $('#messages').append(id + ' has disconnected <br>');
       });
 
-      socket.on('username changed', function(info){
-        $('#messages').append(info.from + ' has changed to ' + info.to + ' <br>');
+      socket.on('usernameChanged', function(info){
+        if (info.self){
+          $('#messages').append('Your username changed from '+ info.from + ' to ' + info.to + '<br>');
+        }
+        else{
+          $('#messages').append('User '+ info.from + ' has changed her username to ' + info.to + '<br>'); 
+        }
       });
 
-      socket.on('chat message', function(msg){
-        $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
+      socket.on('chatMessage', function(msg){
+        if (msg.self){
+          $('#messages').append('You said'+':&nbsp;</span>' + msg.content + '<br>');  
+        }
+        else{
+          $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
+        }
       });
 
       socket.on('login', function() {
         var username = prompt('What username would you like to use?'); 
-        socket.username = username;
+        socket.username = username || socket.id; //Just in case input is null
         socket.emit('login', username);
       });
 
-      socket.on('serverMessage', function(msg){
-        $('#messages').append(msg+'<br>');
+      socket.on('loggedIn', function(msg){
+        if (msg.self){
+          $('#messages').append('You have logged in as ' + msg.username +'<br>');
+        }
+        else{
+          $('#messages').append('User ' + msg.username + ' has joined <br>'); 
+        }
       });
 
     </script>
