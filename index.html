@@ -72,6 +72,7 @@
 
       socket.on('login', function() {
         var username = prompt('What username would you like to use?'); 
+        socket.username = username;
         socket.emit('login', username);
       });
 
