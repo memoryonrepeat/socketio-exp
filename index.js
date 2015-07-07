@@ -44,6 +44,14 @@ io.on('connection', function(socket){
   	});
   });
 
+  socket.on('login', function(username){ 
+    socket.username = username;
+    socket.emit('serverMessage', 'Currently logged in as ' + username); 
+    socket.broadcast.emit('serverMessage', 'User ' + username + ' logged in');  
+  });
+
+  socket.emit('login');
+
 });
 
 http.listen(3000, function(){

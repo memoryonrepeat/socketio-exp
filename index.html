@@ -70,6 +70,15 @@
         $('#messages').append('<span class="sender-name">'+msg.sender+':&nbsp;</span>' + msg.content + '<br>');
       });
 
+      socket.on('login', function() {
+        var username = prompt('What username would you like to use?'); 
+        socket.emit('login', username);
+      });
+
+      socket.on('serverMessage', function(msg){
+        $('#messages').append(msg+'<br>');
+      });
+
     </script>
   </body>
 </html>
