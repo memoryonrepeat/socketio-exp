@@ -28,6 +28,10 @@
           <input id="username" autocomplete="off" />
           <button type="submit">Username</button>
         </form>
+        <form id="room_form" action="">
+          <input id="room" autocomplete="off" />
+          <button type="submit">Room</button>
+        </form>
       </div>
     </div>
     <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
@@ -51,6 +55,14 @@
       $('#username_form').submit(function(){
         socket.username = $('#username').val();
         socket.emit('usernameChanged', socket.username);
+        $('#username').val('');
+        return false;
+      });
+
+      $('#room_form').submit(function(){
+        var room = $('#room').val();
+        socket.emit('roomChanged', room);
+        $('#room').val('');
         return false;
       });
 

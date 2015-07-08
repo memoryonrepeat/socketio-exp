@@ -82,6 +82,12 @@ io.on('connection', function(socket){
     });  
   });
 
+  socket.on('roomChanged', function(room){
+    socket.join(room, function(){
+      console.log(socket.username,' is in these rooms: ', socket.rooms);
+    });
+  });
+
   socket.emit('login');
 
 });
@@ -89,3 +95,9 @@ io.on('connection', function(socket){
 http.listen(3000, function(){
   console.log('listening on *:3000');
 });
+
+
+
+
+
+
