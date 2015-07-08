@@ -32,6 +32,10 @@
           <input id="room" autocomplete="off" />
           <button type="submit">Room</button>
         </form>
+        <form id="leaveroom_form" action="">
+          <input id="leaveroom" autocomplete="off" />
+          <button type="submit">Leave room</button>
+        </form>
       </div>
     </div>
     <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
@@ -63,6 +67,13 @@
         var room = $('#room').val();
         socket.emit('roomChanged', room);
         $('#room').val('');
+        return false;
+      });
+
+      $('#leaveroom_form').submit(function(){
+        var leaveroom = $('#leaveroom').val();
+        socket.emit('leaveRoom', leaveroom);
+        $('#leaveroom').val('');
         return false;
       });
 
@@ -114,6 +125,15 @@
         }
         else{
           $('#messages').append(msg.user+' has joined room '+msg.room+'<br>');  
+        }
+      });
+
+      socket.on('leaveRoom', function(msg){
+        if (msg.self){
+          $('#messages').append('You are now in these rooms: ' + msg.rooms +'<br>'); 
+        }
+        else{
+          $('#messages').append(msg.user+' has left room '+msg.room+'<br>');  
         }
       });
 

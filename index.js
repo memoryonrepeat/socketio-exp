@@ -96,6 +96,20 @@ io.on('connection', function(socket){
     });
   });
 
+  socket.on('leaveRoom', function(room){
+    socket.leave(room, function(){
+      socket.emit('leaveRoom',{
+        self: true,
+        rooms: socket.rooms
+      });
+      socket.broadcast.emit('leaveRoom',{
+        self: false,
+        user: socket.username || socket.id,
+        room: room
+      });
+    });
+  });
+
   socket.emit('login');
 
 });
