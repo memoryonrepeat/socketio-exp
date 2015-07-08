@@ -110,6 +110,13 @@ io.on('connection', function(socket){
     });
   });
 
+  socket.on('private', function(msg){
+    io.sockets.socket(msg.privateTo).emit('private',{
+      sender: msg.sender,
+      content: msg.content
+    })
+  });
+
   socket.emit('login');
 
 });
