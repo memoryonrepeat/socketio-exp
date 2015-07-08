@@ -101,9 +101,19 @@
       socket.on('loggedIn', function(msg){
         if (msg.self){
           $('#messages').append('You have logged in as ' + msg.username +'<br>');
+          socket.emit('roomChanged', 'lobby');
         }
         else{
-          $('#messages').append('User ' + msg.username + ' has joined <br>'); 
+          $('#messages').append(msg.username + ' has joined <br>'); 
+        }
+      });
+
+      socket.on('roomChanged', function(msg){
+        if (msg.self){
+          $('#messages').append('You are now in these rooms: ' + msg.rooms +'<br>'); 
+        }
+        else{
+          $('#messages').append(msg.user+' has joined room '+msg.room+'<br>');  
         }
       });
 

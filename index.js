@@ -84,7 +84,15 @@ io.on('connection', function(socket){
 
   socket.on('roomChanged', function(room){
     socket.join(room, function(){
-      console.log(socket.username,' is in these rooms: ', socket.rooms);
+      socket.emit('roomChanged',{
+        self: true,
+        rooms: socket.rooms
+      });
+      socket.broadcast.emit('roomChanged',{
+        self: false,
+        user: socket.username || socket.id,
+        room: room
+      });
     });
   });
 
