@@ -8,6 +8,12 @@ TODO:
 - Make a proper app & API doc
 - Reliable channel: Acknowledge that message received
 - "seen" feature
+- Stress test to see message drop
+- Fix duplicate leftRoom event
+- Add feature to send message to specific room only
+- Stats of who are in which room
+- UI to click on user in room and send
+- Regex to have IRC-like syntax to join / send private msg
 ---------------------------------------
 Rules:
 - Backend does not handle UI logic. Just pass object to frontend
@@ -26,6 +32,11 @@ io.on('connection', function(socket){
   // io.emit echoes the event to all connected sockets
   io.emit('newConnection', socket.id);
 
+  //console.log('---->Connect',io.sockets);
+
+  /**
+   * TODO: send to those in lobby only
+   */
   socket.on('chatMessage', function(msg){
 
     // socket.broadcast relays the event to all sockets except the sender
@@ -45,6 +56,7 @@ io.on('connection', function(socket){
 
   socket.on('disconnect', function(){
   	io.emit('newDisconnection', socket.username || socket.id);
+    //console.log('---->Disconnect',io.sockets);
   });
 
   socket.on('usernameChanged', function(username){
@@ -96,6 +108,9 @@ io.on('connection', function(socket){
     });
   });
 
+  /**
+   * TODO: Warning/Reconfirm if leaving lobby
+   */
   socket.on('leaveRoom', function(room){
     socket.leave(room, function(){
       socket.emit('leaveRoom',{
@@ -111,10 +126,31 @@ io.on('connection', function(socket){
   });
 
   socket.on('private', function(msg){
-    io.sockets.socket(msg.privateTo).emit('private',{
+    
+    /**
+     * Works even if peer has left their default room
+     * TODO: Handle exception if target not found
+     * Alternatives:
+     * io.sockets.sockets Array [{socket1}, {socket2}]
+     * io.sockets.adapter.sids Object {socket1: {}, socket2: {}}
+     * io.sockets.adapter.rooms Object {room1: {}, room2: {}}
+     * io.sockets.server.eio.clients Object
+     * io.sockets.server.engine.clients Object
+     */
+    io.sockets.connected[msg.target].emit('private',{
       sender: msg.sender,
       content: msg.content
-    })
+    });
+
+    /**
+     * This only works if peer hasn't left her default room (room==socket.id); 
+     */
+    
+    /*socket.broadcast.to(msg.target).emit('private',{
+      sender: msg.sender,
+      content: msg.content
+    });*/
+
   });
 
   socket.emit('login');
