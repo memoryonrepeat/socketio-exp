@@ -32,8 +32,6 @@ io.on('connection', function(socket){
   // io.emit echoes the event to all connected sockets
   io.emit('newConnection', socket.id);
 
-  //console.log('---->Connect',io.sockets);
-
   /**
    * TODO: send to those in lobby only
    */
@@ -134,13 +132,20 @@ io.on('connection', function(socket){
      * io.sockets.sockets Array [{socket1}, {socket2}]
      * io.sockets.adapter.sids Object {socket1: {}, socket2: {}}
      * io.sockets.adapter.rooms Object {room1: {}, room2: {}}
-     * io.sockets.server.eio.clients Object
-     * io.sockets.server.engine.clients Object
+     * io.sockets.server.eio.clients Object Client sockets
+     * io.sockets.server.engine.clients Object Client sockets
      */
-    io.sockets.connected[msg.target].emit('private',{
-      sender: msg.sender,
-      content: msg.content
-    });
+    if (io.sockets.connected[msg.target]){
+      io.sockets.connected[msg.target].emit('private',{
+        sender: msg.sender,
+        content: msg.content
+      });
+    }
+    else{
+      socket.emit('err',{
+        err: 'target not found'
+      });
+    }
 
     /**
      * This only works if peer hasn't left her default room (room==socket.id); 

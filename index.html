@@ -165,6 +165,10 @@
         $('#messages').append('(private) '+msg.sender+': '+msg.content+'<br>');
       });
 
+      socket.on('err', function(msg){
+        $('#messages').append(msg.err);
+      });
+
     </script>
   </body>
 </html>
