@@ -21,16 +21,17 @@
         <div id="messages">
         </div>
         <form id="message_form" action="">
-          <input id="message" autocomplete="off" />
+          <input id="message" autocomplete="off" placeholder="message" />
+          <input id="broadcastRoom" autocomplete="off" placeholder="broadcastRoom" />
           <button type="submit">Send</button>
         </form>
         <form id="username_form" action="">
-          <input id="username" autocomplete="off" />
+          <input id="username" autocomplete="off" placeholder="username" />
           <button type="submit">Username</button>
         </form>
         <form id="room_form" action="">
-          <input id="room" autocomplete="off" />
-          <button type="submit">Room</button>
+          <input id="room" autocomplete="off" placeholder="room" />
+          <button type="submit">Change room</button>
         </form>
         <form id="leaveroom_form" action="">
           <input id="leaveroom" autocomplete="off" />
@@ -53,9 +54,11 @@
       $('#message_form').submit(function(){
         socket.emit('chatMessage', {
           sender:  socket.username || socket.id,
-          content: $('#message').val()
+          content: $('#message').val(),
+          broadcastRoom: $('#broadcastRoom').val()
         });
         $('#message').val('');
+        $('#broadcastRoom').val('');
         return false;
       });
 

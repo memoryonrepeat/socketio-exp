@@ -8,8 +8,8 @@ TODO:
 - Make a proper app & API doc
 - Reliable channel: Acknowledge that message received
 - "seen" feature
+- Fix duplicate event when leave room
 - Stress test to see message drop
-- Fix duplicate leftRoom event
 - Add feature to send message to specific room only
 - Stats of who are in which room
 - UI to click on user in room and send
@@ -37,12 +37,22 @@ io.on('connection', function(socket){
    */
   socket.on('chatMessage', function(msg){
 
-    // socket.broadcast relays the event to all sockets except the sender
-    socket.broadcast.emit('chatMessage', {
-      sender: msg.sender,
-      content: msg.content,
-      self: false
-    });
+    // broadcast to room
+    if ( (msg.broadcastRoom) && (io.sockets.adapter.rooms.hasOwnProperty(msg.broadcastRoom)) ){
+      socket.broadcast.to(msg.broadcastRoom).emit('chatMessage',{
+        sender: msg.sender,
+        content: msg.content,
+        self: false
+      });
+    }
+    else{ // else, broadcast to all
+      // socket.broadcast relays the event to all sockets except the sender
+      socket.broadcast.emit('chatMessage', {
+        sender: msg.sender,
+        content: msg.content,
+        self: false
+      });
+    }
     
     // socket.emit echoes the event to the same socket only
     socket.emit('chatMessage', {
