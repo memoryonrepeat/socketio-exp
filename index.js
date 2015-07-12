@@ -23,9 +23,9 @@ Rules:
 var app = require('express')();
 var http = require('http');
 var server = http.createServer(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server).of('/chat');
 
-app.get('/', function(req, res){
+app.get('/chat', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
@@ -174,8 +174,10 @@ io.on('connection', function(socket){
 
 });
 
-server.listen(3000, function(){
-  console.log('listening on *:3000');
+// Temporarily using port 80 due to unfixed client bug when using port other than 80
+// https://github.com/Automattic/socket.io-client/issues/812
+server.listen(80, function(){
+  console.log('listening on *:80');
 });
 
 
