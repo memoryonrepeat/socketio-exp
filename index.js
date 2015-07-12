@@ -10,11 +10,9 @@ TODO:
 - "seen" feature
 - Fix duplicate event when leave room
 - Stress test to see message drop
-- Add feature to send message to specific room only
 - Stats of who are in which room
 - UI to click on user in room and send
 - Regex to have IRC-like syntax to join / send private msg
-- Utilize namespace
 ---------------------------------------
 Rules:
 - Backend does not handle UI logic. Just pass object to frontend
