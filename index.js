@@ -13,6 +13,9 @@ TODO:
 - Stats of who are in which room
 - UI to click on user in room and send
 - Regex to have IRC-like syntax to join / send private msg
+- Reference: https://github.com/Zolomon/ShitChat
+- Fix private message fail when using namespace
+- More proper error handler and unit tests
 ---------------------------------------
 Rules:
 - Backend does not handle UI logic. Just pass object to frontend
@@ -38,7 +41,9 @@ io.on('connection', function(socket){
   socket.on('chatMessage', function(msg){
 
     // broadcast to room
-    if ( (msg.broadcastRoom) && (io.sockets.adapter.rooms.hasOwnProperty(msg.broadcastRoom)) ){
+    // Use io.adapter.rooms for io with namespace
+    // Use io.sockets.adapter.rooms for io without namespace
+    if ( (msg.broadcastRoom) && (io.adapter.rooms.hasOwnProperty(msg.broadcastRoom)) ){
       socket.broadcast.to(msg.broadcastRoom).emit('chatMessage',{
         sender: msg.sender,
         content: msg.content,
@@ -47,11 +52,16 @@ io.on('connection', function(socket){
     }
     else{ // else, broadcast to all
       // socket.broadcast relays the event to all sockets except the sender
+
+      //console.log('---',io.sockets);
+      console.log('||||',io);
+      
       socket.broadcast.emit('chatMessage', {
         sender: msg.sender,
         content: msg.content,
         self: false
       });
+
     }
     
     // socket.emit echoes the event to the same socket only
@@ -145,6 +155,28 @@ io.on('connection', function(socket){
      * io.sockets.server.eio.clients Object Client sockets
      * io.sockets.server.engine.clients Object Client sockets
      */
+      
+    // IO with namespace  
+    if (io.connected[msg.target]){
+      io.connected[msg.target].emit('private',{
+        sender: msg.sender,
+        content: msg.content
+      });
+    }
+    else{
+      socket.emit('err',{
+        err: 'target not found'
+      });
+    }
+
+    // socket.emit echoes the event to the same socket only
+    socket.emit('chatMessage', {
+      content: msg.content,
+      self: true
+    });
+
+    /*
+    // IO without namespace
     if (io.sockets.connected[msg.target]){
       io.sockets.connected[msg.target].emit('private',{
         sender: msg.sender,
@@ -156,15 +188,15 @@ io.on('connection', function(socket){
         err: 'target not found'
       });
     }
-
-    /**
-     * This only works if peer hasn't left her default room (room==socket.id); 
-     */
+    */
     
-    /*socket.broadcast.to(msg.target).emit('private',{
+    /*
+    // This only works if peer hasn't left her default room (room==socket.id); 
+    socket.broadcast.to(msg.target).emit('private',{
       sender: msg.sender,
       content: msg.content
-    });*/
+    });
+    */
 
   });
 
