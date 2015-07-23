@@ -30,6 +30,11 @@ app.get('/chat', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/conn', function(req,res){
+  var result = io.sockets.length.toString();
+  res.send(result);
+});
+
 io.on('connection', function(socket){
 
   // io.emit echoes the event to all connected sockets
