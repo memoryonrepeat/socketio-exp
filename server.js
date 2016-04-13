@@ -24,9 +24,11 @@ Rules:
 var app = require('express')();
 var http = require('http');
 var server = http.createServer(app);
-var io = require('socket.io')(server).of('/chat');
+var io = require('socket.io').listen(server);
+var redis = require('socket.io-redis');
+io.adapter(redis({ host: 'localhost', port: 6379 }));
 
-app.get('/chat', function(req, res){
+app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
@@ -48,7 +50,7 @@ io.on('connection', function(socket){
     // broadcast to room
     // Use io.adapter.rooms for io with namespace
     // Use io.sockets.adapter.rooms for io without namespace
-    if ( (msg.broadcastRoom) && (io.adapter.rooms.hasOwnProperty(msg.broadcastRoom)) ){
+    if ( (msg.broadcastRoom) && (io.sockets.adapter.rooms.hasOwnProperty(msg.broadcastRoom)) ){
       socket.broadcast.to(msg.broadcastRoom).emit('chatMessage',{
         sender: msg.sender,
         content: msg.content,
@@ -148,7 +150,11 @@ io.on('connection', function(socket){
     });
   });
 
-  socket.on('private', function(msg){
+  socket.on('message', function(msg){
+
+    console.log('got message from signaling !',msg);
+
+    // console.log(io.server.engine.clientsCount);
     
     /**
      * Works even if peer has left their default room
@@ -162,7 +168,7 @@ io.on('connection', function(socket){
      */
       
     // IO with namespace  
-    if (io.connected[msg.target]){
+    /*if (io.connected[msg.target]){
       io.connected[msg.target].emit('private',{
         sender: msg.sender,
         content: msg.content
@@ -178,9 +184,9 @@ io.on('connection', function(socket){
     socket.emit('chatMessage', {
       content: msg.content,
       self: true
-    });
+    });*/
 
-    /*
+    
     // IO without namespace
     if (io.sockets.connected[msg.target]){
       io.sockets.connected[msg.target].emit('private',{
@@ -193,7 +199,7 @@ io.on('connection', function(socket){
         err: 'target not found'
       });
     }
-    */
+    
     
     /*
     // This only works if peer hasn't left her default room (room==socket.id); 
@@ -211,6 +217,7 @@ io.on('connection', function(socket){
 
 // Temporarily using port 80 due to unfixed client bug when using port other than 80
 // https://github.com/Automattic/socket.io-client/issues/812
+// To use port 80, have to sudo
 server.listen(80, function(){
   console.log('listening on *:80');
 });
